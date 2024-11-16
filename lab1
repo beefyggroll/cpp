@@ -1,1 +1,112 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
 
+struct Student {
+    char surname[30];
+    char name[30];
+    char group[10];
+    double grades[3]; 
+    double average; 
+};
+
+void CalculateAverage(Student& student) {
+    student.average = (student.grades[0] + student.grades[1] + student.grades[2]) / 3.0;
+}
+
+void InsertStudent(Student& student) {
+    std::cout << "Insert surname: ";
+    std::cin.getline(student.surname, sizeof(student.surname));
+
+    std::cout << "Insert name: ";
+    std::cin.getline(student.name, sizeof(student.name));
+
+    std::cout << "Insert group: ";
+    std::cin.getline(student.group, sizeof(student.group));
+
+    std::cout << "Insert grades for three exams:\n";
+    for (int i = 0; i < 3; ++i) {
+        std::cout << "Grade " << (i + 1) << ": ";
+        std::cin >> student.grades[i];
+    }
+    std::cin.ignore(); 
+
+    CalculateAverage(student);
+}
+
+void ViewStudentsAboveAverage(Student* students, int count) {
+    std::cout << std::left << std::setw(20) << "Surname"
+              << std::setw(20) << "Name"
+              << std::setw(10) << "Group"
+              << std::setw(10) << "Avg Grade"
+              << std::setw(10) << "Grades" << std::endl;
+
+    std::string line(100, '-');
+    std::cout << line << std::endl;
+
+    for (int i = 0; i < count; ++i) {
+        if (students[i].average >= 4.5) {
+            std::cout << std::setw(20) << students[i].surname
+                      << std::setw(20) << students[i].name
+                      << std::setw(10) << students[i].group
+                      << std::setw(10) << std::fixed << std::setprecision(2) << students[i].average
+                      << std::setw(10) << students[i].grades[0] << ", "
+                      << students[i].grades[1] << ", "
+                      << students[i].grades[2] << std::endl;
+        }
+    }
+}
+
+void ViewAllStudents(Student* students, int count) {
+    std::cout << std::left << std::setw(20) << "Surname"
+              << std::setw(20) << "Name"
+              << std::setw(10) << "Group"
+              << std::setw(10) << "Avg Grade"
+              << std::setw(10) << "Grades" << std::endl;
+
+    std::string line(100, '-');
+    std::cout << line << std::endl;
+
+    for (int i = 0; i < count; ++i) {
+        std::cout << std::setw(20) << students[i].surname
+                  << std::setw(20) << students[i].name
+                  << std::setw(10) << students[i].group
+                  << std::setw(10) << std::fixed << std::setprecision(2) << students[i].average
+                  << std::setw(10) << students[i].grades[0] << ", "
+                  << students[i].grades[1] << ", "
+                  << students[i].grades[2] << std::endl;
+    }
+}
+
+int main() {
+    Student students[30];
+    int count = 0; 
+    char choice;
+
+    do {
+        std::cout << "\nMenu:\n";
+        std::cout << "1. Insert student data\n";
+        std::cout << "2. View students with average grade >= 4.5\n";
+        std::cout << "3. View all students\n";
+        std::cout << "4. Exit\n";
+
+        std::string input;
+        std::getline(std::cin, input);
+
+        if (input == "4") {
+            break;
+        } else if (input == "1") {
+            InsertStudent(students[count]);
+            count++; 
+        } else if (input == "2") {
+            ViewStudentsAboveAverage(students, count);
+        } else if (input == "3") { 
+            ViewAllStudents(students, count);
+        } else {
+            std::cout << "Error. Enter a valid option\n";
+        }
+
+    } while (true);
+
+    return 0;
+}
