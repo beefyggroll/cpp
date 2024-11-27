@@ -38,8 +38,10 @@ void ViewStudentsAboveAverage(Student* students, int count) {
     std::cout << std::left << std::setw(20) << "Surname"
               << std::setw(20) << "Name"
               << std::setw(10) << "Group"
-              << std::setw(10) << "Avg Grade"
-              << std::setw(10) << "Grades" << std::endl;
+              << std::setw(13) << "Avg Grade"
+              << std::setw(10) << "Exam 1"
+              << std::setw(10) << "Exam 2"
+              << std::setw(10) << "Exam 3" << std::endl;
 
     std::string line(100, '-');
     std::cout << line << std::endl;
@@ -49,10 +51,11 @@ void ViewStudentsAboveAverage(Student* students, int count) {
             std::cout << std::setw(20) << students[i].surname
                       << std::setw(20) << students[i].name
                       << std::setw(10) << students[i].group
-                      << std::setw(10) << std::fixed << std::setprecision(2) << students[i].average
-                      << std::setw(10) << students[i].grades[0] << ", "
-                      << students[i].grades[1] << ", "
-                      << students[i].grades[2] << std::endl;
+                      << std::setw(13) << std::fixed << std::setprecision(2) << students[i].average
+                      << std::setw(10) << students[i].grades[0]
+                      << std::setw(10) << students[i].grades[1]
+                      << std::setw(10) << students[i].grades[2] 
+                      << std::endl;
         }
     }
 }
@@ -61,20 +64,23 @@ void ViewAllStudents(Student* students, int count) {
     std::cout << std::left << std::setw(20) << "Surname"
               << std::setw(20) << "Name"
               << std::setw(10) << "Group"
-              << std::setw(10) << "Avg Grade"
-              << std::setw(10) << "Grades" << std::endl;
+              << std::setw(13) << "Avg Grade"
+              << std::setw(10) << "Exam 1"
+              << std::setw(10) << "Exam 2"
+              << std::setw(10) << "Exam 3" << std::endl;
 
     std::string line(100, '-');
     std::cout << line << std::endl;
 
     for (int i = 0; i < count; ++i) {
         std::cout << std::setw(20) << students[i].surname
-                  << std::setw(20) << students[i].name
-                  << std::setw(10) << students[i].group
-                  << std::setw(10) << std::fixed << std::setprecision(2) << students[i].average
-                  << std::setw(10) << students[i].grades[0] << ", "
-                  << students[i].grades[1] << ", "
-                  << students[i].grades[2] << std::endl;
+                      << std::setw(20) << students[i].name
+                      << std::setw(10) << students[i].group
+                      << std::setw(13) << std::fixed << std::setprecision(2) << students[i].average
+                      << std::setw(10) << students[i].grades[0]
+                      << std::setw(10) << students[i].grades[1]
+                      << std::setw(10) << students[i].grades[2] 
+                      << std::endl;
     }
 }
 
