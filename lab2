@@ -1,1 +1,135 @@
-2
+#include <iostream>
+#include <iomanip>
+#include <string>
+
+class Student {
+private:
+    std::string surname;
+    std::string name;
+    std::string group;
+    double grades[3]; 
+    double average; 
+
+public:
+    // Метод для ввода данных студента
+    void Insert() {
+        std::cout << "Insert surname: ";
+        std::getline(std::cin, surname);
+
+        std::cout << "Insert name: ";
+        std::getline(std::cin, name);
+
+        std::cout << "Insert group: ";
+        std::getline(std::cin, group);
+
+        std::cout << "Insert grades for three exams:\n";
+        for (int i = 0; i < 3; ++i) {
+            std::cout << "Grade " << (i + 1) << ": ";
+            std::cin >> grades[i];
+        }
+        std::cin.ignore(); // Очищаем буфер
+
+        CalculateAverage();
+    }
+
+    // Метод для вычисления среднего балла
+    void CalculateAverage() {
+        average = (grades[0] + grades[1] + grades[2]) / 3.0;
+    }
+
+    // Метод для получения среднего балла
+    double GetAverage() const {
+        return average;
+    }
+
+    // Метод для отображения информации о студенте
+    void Display() const {
+        std::cout << std::setw(20) << surname
+                  << std::setw(20) << name
+                  << std::setw(10) << group
+                  << std::setw(13) << std::fixed << std::setprecision(2) << average
+                  << std::setw(10) << grades[0]
+                  << std::setw(10) << grades[1]
+                  << std::setw(10) << grades[2] 
+                  << std::endl;
+    }
+
+    // Метод для проверки, превышает ли средний балл заданное значение
+    bool IsAboveAverage(double threshold) const {
+        return average >= threshold;
+    }
+};
+
+void ViewStudentsAboveAverage(Student* students, int count) {
+    std::cout << std::left << std::setw(20) << "Surname"
+              << std::setw(20) << "Name"
+              << std::setw(10) << "Group"
+              << std::setw(13) << "Avg Grade"
+              << std::setw(10) << "Exam 1"
+              << std::setw(10) << "Exam 2"
+              << std::setw(10) << "Exam 3" << std::endl;
+
+    std::string line(100, '-');
+    std::cout << line << std::endl;
+
+    for (int i = 0; i < count; ++i) {
+        if (students[i].IsAboveAverage(4.5)) {
+            students[i].Display();
+        }
+    }
+}
+
+void ViewAllStudents(Student* students, int count) {
+    std::cout << std::left << std::setw(20) << "Surname"
+              << std::setw(20) << "Name"
+              << std::setw(10) << "Group"
+              << std::setw(13) << "Avg Grade"
+              << std::setw(10) << "Exam 1"
+              << std::setw(10) << "Exam 2"
+              << std::setw(10) << "Exam 3" << std::endl;
+
+    std::string line(100, '-');
+    std::cout << line << std::endl;
+
+    for (int i = 0; i < count; ++i) {
+        students[i].Display();
+    }
+}
+
+int main() {
+    Student students[30];
+    int count = 0; 
+    char choice;
+
+    do {
+        std::cout << "\nMenu:\n";
+        std::cout << "1. Insert student data\n";
+        std::cout << "2. View students with average grade >= 4.5\n";
+        std::cout << "3. View all students\n";
+        std::cout << "4. Exit\n";
+
+        std::string input;
+        std::getline(std::cin, input);
+
+        if (input == "4") {
+            break;
+        } else if (input == "1") {
+            if (count < 30) { // Проверка на переполнение массива
+                students[count].Insert();
+                count++; 
+            } else {
+                std::cout << "Student list is full.\n";
+            }
+        } else if (input == "2") {
+            ViewStudentsAboveAverage(students, count);
+        } else if (input == "3") { 
+            ViewAllStudents(students, count);
+        } else {
+            std::cout << "Error. Enter a valid option\n";
+        }
+
+    } while (true);
+
+    return 0;
+}
+
