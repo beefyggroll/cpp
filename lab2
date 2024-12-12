@@ -13,24 +13,35 @@ private:
 public:
     // Метод для ввода данных студента
     void Insert() {
-        std::cout << "Insert surname: ";
-        std::getline(std::cin, surname);
+    std::cout << "Insert surname: ";
+    std::getline(std::cin, surname);
 
-        std::cout << "Insert name: ";
-        std::getline(std::cin, name);
+    std::cout << "Insert name: ";
+    std::getline(std::cin, name);
 
-        std::cout << "Insert group: ";
-        std::getline(std::cin, group);
+    std::cout << "Insert group: ";
+    std::getline(std::cin, group);
 
-        std::cout << "Insert grades for three exams:\n";
-        for (int i = 0; i < 3; ++i) {
+    std::cout << "Insert grades for three exams:\n";
+    for (int i = 0; i < 3; ++i) {
+        double grade;
+        while (true) {
             std::cout << "Grade " << (i + 1) << ": ";
-            std::cin >> grades[i];
-        }
-        std::cin.ignore(); // Очищаем буфер
+            std::cin >> grade;
 
-        CalculateAverage();
+            // Проверка на диапазон
+            if (grade >= 0 && grade <= 5) {
+                grades[i] = grade;
+                break; // Если оценка корректна, выходим из цикла
+            } else {
+                std::cout << "Error: Grade must be between 0 and 5. Please try again.\n";
+            }
+        }
     }
+    std::cin.ignore(); // Очищаем буфер
+
+    CalculateAverage();
+}
 
     // Метод для вычисления среднего балла
     void CalculateAverage() {
@@ -132,4 +143,3 @@ int main() {
 
     return 0;
 }
-
