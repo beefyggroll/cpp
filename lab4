@@ -1,0 +1,315 @@
+#include <iostream>
+#include <iomanip>
+#include <cstring>
+
+// Абстрактный класс студента
+class Student {
+protected:
+    char surname[30];
+    char name[30];
+    char group[10];
+    double grades[3];
+    double average;
+
+public:
+    Student() {
+        strcpy(surname, "Unknown");
+        strcpy(name, "Unknown");
+        strcpy(group, "Unknown");
+        grades[0] = grades[1] = grades[2] = 0.0;
+        average = 0.0;
+    }
+
+    virtual ~Student() {}
+
+    virtual void Insert() = 0; // Чисто виртуальный метод для ввода данных
+    virtual void Display(int studentNumber) const = 0; // Чисто виртуальный метод для отображения данных
+
+    double GetAverage() const { return average; }
+    const char* GetSurname() const { return surname; }
+    const char* GetName() const { return name; }
+    const char* GetGroup() const { return group; }
+
+    void CalculateAverage() {
+        average = (grades[0] + grades[1] + grades[2]) / 3.0;
+    }
+
+    bool IsAboveAverage(double threshold) const {
+        return average >= threshold;
+    }
+};
+
+// Класс для бакалавров
+class UndergraduateStudent : public Student {
+private:
+    int courseNumber;
+
+public:
+    void Insert() override {
+        std::cout << "Insert surname: ";
+        std::cin.getline(surname, 30);
+
+        std::cout << "Insert name: ";
+        std::cin.getline(name, 30);
+
+        std::cout << "Insert group: ";
+        std::cin.getline(group, 10);
+
+        std::cout << "Insert course number: ";
+        std::cin >> courseNumber;
+
+        std::cout << "Insert grades for three exams:\n";
+        for (int i = 0; i < 3; ++i) {
+            double grade;
+            while (true) {
+                std::cout << "Grade " << (i + 1) << ": ";
+                std::cin >> grade;
+
+                if (grade >= 2 && grade <= 5) {
+                    grades[i] = grade;
+                    break;
+                } else {
+                    std::cout << "Error: Grade must be between 2 and 5. Please try again.\n";
+                }
+            }
+        }
+        std::cin.ignore();
+        CalculateAverage();
+    }
+
+    void Display(int studentNumber) const override {
+        std::cout << std::setw(8) << studentNumber
+                  << std::setw(20) << surname
+                  << std::setw(20) << name
+                  << std::setw(10) << group
+                  << std::setw(13) << std::fixed << std::setprecision(2) << average
+                  << std::setw(10) << grades[0]
+                  << std::setw(10) << grades[1]
+                  << std::setw(10) << grades[2]
+                  << std::setw(10) << "Course: " << courseNumber
+                  << std::endl;
+    }
+};
+
+// Класс для магистров
+class GraduateStudent : public Student {
+protected:
+    int graduationYear;
+
+public:
+    void Insert() override {
+        std::cout << "Insert surname: ";
+        std::cin.getline(surname, 30);
+
+        std::cout << "Insert name: ";
+        std::cin.getline(name, 30);
+
+        std::cout << "Insert group: ";
+        std::cin.getline(group, 10);
+
+        std::cout << "Insert graduation year: ";
+        std::cin >> graduationYear;
+
+        std::cout << "Insert grades for three exams:\n";
+        for (int i = 0; i < 3; ++i) {
+            double grade;
+            while (true) {
+                std::cout << "Grade " << (i + 1) << ": ";
+                std::cin >> grade;
+
+                if (grade >= 2 && grade <= 5) {
+                    grades[i] = grade;
+                    break;
+                } else {
+                    std::cout << "Error: Grade must be between 2 and 5. Please try again.\n";
+                }
+            }
+        }
+        std::cin.ignore();
+        CalculateAverage();
+    }
+
+    void Display(int studentNumber) const override {
+        std::cout << std::setw(8) << studentNumber
+                  << std::setw(20) << surname
+                  << std::setw(20) << name
+                  << std::setw(10) << group
+                  << std::setw(13) << std::fixed << std::setprecision(2) << average
+                  << std::setw(10) << grades[0]
+                  << std::setw(10) << grades[1]
+                  << std::setw(10) << grades[2]
+                  << std::setw(10) << "Graduation year: " << graduationYear
+                  << std::endl;
+
+    }
+};
+
+// Класс для аспирантов
+class PhDStudent : public GraduateStudent {
+private:
+    char dissertationTitle[50];
+
+public:
+    void Insert() override {
+        GraduateStudent::Insert(); // Вызов метода родительского класса для ввода общих данных
+
+        std::cout << "Insert dissertation title: ";
+        std::cin.ignore();
+        std::cin.getline(dissertationTitle, 50);
+    }
+
+    void Display(int studentNumber) const override {
+        std::cout << std::setw(8) << studentNumber
+                  << std::setw(20) << surname
+                  << std::setw(20) << name
+                  << std::setw(10) << group
+                  << std::setw(13) << std::fixed << std::setprecision(2) << average
+                  << std::setw(10) << grades[0]
+                  << std::setw(10) << grades[1]
+                  << std::setw(10) << grades[2]
+                  << std::setw(10) << "Graduation year: " << graduationYear
+                  << std::setw(10) << "Dissertation title: " << dissertationTitle
+                  << std::endl;
+    }
+};
+
+// Список студентов
+class StudentList {
+private:
+    Student** students; // Указатель на массив указателей на студентов
+    int capacity;      // Вместимость массива
+    int count;        // Текущее количество студентов
+
+public:
+    StudentList(int initialCapacity = 10) : capacity(initialCapacity), count(0) {
+        students = new Student*[capacity]; // Выделение памяти под массив указателей
+    }
+
+    ~StudentList() {
+        for (int i = 0; i < count; ++i) {
+            delete students[i]; // Освобождение памяти для каждого студента
+        }
+        delete[] students; // Освобождение памяти для массива указателей
+    }
+
+    void AddStudent(int type) {
+        if (count >= capacity) { // Если массив заполнен, увеличиваем его размер
+            capacity *= 2; // Увеличиваем в два раза
+            Student** newStudents = new Student*[capacity];
+            for (int i = 0; i < count; ++i) {
+                newStudents[i] = students[i]; // Копируем старые указатели
+            }
+            delete[] students; // Освобождаем старый массив
+            students = newStudents; // Указываем на новый массив
+        }
+
+        Student* newStudent = nullptr;
+        if (type == 1) {
+            newStudent = new UndergraduateStudent();
+        } else if (type == 2) {
+            newStudent = new GraduateStudent();
+        } else if (type == 3) {
+            newStudent = new PhDStudent();
+        }
+        if (newStudent) {
+            newStudent->Insert();
+            students[count++] = newStudent; // Добавляем нового студента и увеличиваем счетчик
+        }
+    }
+
+    void ViewStudentsAboveAverage(double threshold) const {
+        std::cout << std::left << std::setw(8) << "No." 
+                  << std::setw(20) << "Surname"
+                  << std::setw(20) << "Name"
+                  << std::setw(10) << "Group"
+                  << std::setw(15) << "Average" << std::endl;
+
+        std::string line(180, '-');
+        std::cout << line << std::endl;
+
+        for (int i = 0; i < count; ++i) {
+            if (students[i]->IsAboveAverage(threshold)) { // Проверяем всех студентов
+                std::cout << std::setw(8) << i + 1
+                          << std::setw(20) << students[i]->GetSurname()
+                          << std::setw(20) << students[i]->GetName()
+                          << std::setw(10) << students[i]->GetGroup()
+                          << std::setw(15) << std::fixed << std::setprecision(2) << students[i]->GetAverage() << std::endl;
+            }
+        }
+    }
+
+    void ViewStudentsByType(int type) const {
+        std::cout << std::left << std::setw(8) << "No." 
+                  << std::setw(20) << "Surname"
+                  << std::setw(20) << "Name"
+                  << std::setw(10) << "Group"
+                  << std::setw(13) << "Average"
+                  << std::setw(10) << "Exam 1"
+                  << std::setw(10) << "Exam 2"
+                  << std::setw(10) << "Exam 3" << std::endl;
+
+        std::string line(180, '-');
+        std::cout << line << std::endl;
+
+        for (int i = 0; i < count; ++i) {
+            if ((type == 1 && dynamic_cast<UndergraduateStudent*>(students[i])) ||
+                (type == 2 && dynamic_cast<GraduateStudent*>(students[i]) && 
+                 !dynamic_cast<PhDStudent*>(students[i])) || // Убедимся, что это не аспирант
+                (type == 3 && dynamic_cast<PhDStudent*>(students[i]))) {
+                students[i]->Display(i + 1); // Вызываем метод Display для каждого студента
+            }
+        }
+    }
+};
+
+int main() {
+    StudentList studentList;
+    int choice; 
+
+    do {
+        std::cout << "\nMenu:\n";
+        std::cout << "1. Insert undergraduate student data\n";
+        std::cout << "2. Insert graduate student data\n";
+        std::cout << "3. Insert PhD student data\n";
+        std::cout << "4. View students with average grade >= 4.5\n";
+        std::cout << "5. View undergraduate students\n";
+        std::cout << "6. View graduate students\n";
+        std::cout << "7. View PhD students\n";
+        std::cout << "8. Exit\n";
+        std::cin >> choice; 
+        std::cin.ignore(); 
+
+        switch (choice) {
+            case 1:
+                studentList.AddStudent(1);
+                break;
+            case 2:
+                studentList.AddStudent(2);
+                break;
+            case 3:
+                studentList.AddStudent(3);
+                break;
+            case 4:
+                studentList.ViewStudentsAboveAverage(4.5); // Теперь выводит всех студентов с баллом >= 4.5
+                break;
+            case 5:
+                studentList.ViewStudentsByType(1);
+                break;
+            case 6:
+                studentList.ViewStudentsByType(2);
+                break;
+            case 7:
+                studentList.ViewStudentsByType(3);
+                break;
+            case 8:
+                std::cout << "Exiting the program." << std::endl;
+                break;
+            default:
+                std::cout << "Error. Enter a valid option\n";
+                break;
+        }
+
+    } while (choice != 8); 
+
+    return 0;
+}
