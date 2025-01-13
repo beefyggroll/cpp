@@ -1,0 +1,402 @@
+#include <iostream>
+#include <iomanip>
+#include <cstring>
+
+//класс студней
+class Student {
+private:
+    char surname[30];
+    char name[30];
+    char group[10];
+    double grades[3];
+    double average;
+
+public:
+    //конструктор
+    Student() {
+        strcpy(surname, "Unknown");
+        strcpy(name, "Unknown");
+        strcpy(group, "Unknown");
+        grades[0] = grades[1] = grades[2] = 0.0;
+        average = 0.0;
+    }
+
+    //конструктор копирования
+    Student(const Student& other) {
+        strcpy(surname, other.surname);
+        strcpy(name, other.name);
+        strcpy(group, other.group);
+        for (int i = 0; i < 3; ++i) {
+            grades[i] = other.grades[i];
+        }
+        average = other.average;
+    }
+
+    //метод для клонирования
+    Student Clone() const {
+        return Student(*this);
+    }
+
+    //оператор присваивания
+    Student& operator=(const Student& other) {
+        if (this != &other) { 
+            strcpy(surname, other.surname);
+            strcpy(name, other.name);
+            strcpy(group, other.group);
+            for (int i = 0; i < 3; ++i) {
+                grades[i] = other.grades[i];
+            }
+            average = other.average;
+        }
+        return *this; //возвращаем ссылку на текущий объект
+    }
+
+    ~Student() {}
+
+    //перегрузка инкремента
+    Student& operator++() {
+        for (int i = 0; i < 3; ++i) {
+            grades[i] += 0.1; 
+            if (grades[i] > 5.0) {
+                grades[i] = 5.0; 
+            }
+        }
+        CalculateAverage(); 
+        return *this;
+    }
+
+    //перегрузка декремента
+    Student& operator--() {
+        for (int i = 0; i < 3; ++i) {
+            grades[i] -= 0.1; 
+            if (grades[i] < 2.0) {
+                grades[i] = 2.0; 
+            }
+        }
+        CalculateAverage(); 
+        return *this;
+    }
+
+    //перегрузка оператора деления
+    Student operator/(const Student& other) const {
+        Student result;
+        result.average = (this->average + other.average) / 2.0;
+
+        for (int i = 0; i < 3; ++i) {
+            result.grades[i] = (this->grades[i] + other.grades[i]) / 2.0;
+        }
+
+        return result;
+    }
+
+    //перегрузка оператора умножения
+    Student operator*(double multiplier) const {
+        Student result;
+
+        strcpy(result.surname, this->surname);
+        strcpy(result.name, this->name);
+        strcpy(result.group, this->group);
+
+        for (int i = 0; i < 3; ++i) {
+            result.grades[i] = this->grades[i] * multiplier;
+
+            if (result.grades[i] > 5.0) {
+                result.grades[i] = 5.0;
+            } else if (result.grades[i] < 2.0) {
+                result.grades[i] = 2.0;
+            }
+        }
+
+        result.CalculateAverage();
+
+        return result;
+    }
+
+    //ввод данных студентов
+    void Insert() {
+        std::cout << "Insert surname: ";
+        std::cin.getline(surname, 30);
+
+        std::cout << "Insert name: ";
+        std::cin.getline(name, 30);
+
+        std::cout << "Insert group: ";
+        std::cin.getline(group, 10);
+
+        std::cout << "Insert grades for three exams:\n";
+        for (int i = 0; i < 3; ++i) {
+            double grade;
+            while (true) {
+                std::cout << "Grade " << (i + 1) << ": ";
+                std::cin >> grade;
+
+                if (grade >= 2 && grade <= 5) {
+                    grades[i] = grade;
+                    break;
+                } else {
+                    std::cout << "Error: Grade must be between 2 and 5. Please try again.\n";
+                }
+            }
+        }
+        std::cin.ignore();
+        CalculateAverage();
+    }
+
+    void CalculateAverage() {
+        average = (grades[0] + grades[1] + grades[2]) / 3.0;
+    }
+
+    double GetAverage() const {
+        return average;
+    }
+
+    //вывод данных
+    void Display(int studentNumber) const {
+        std::cout << std::setw(8) << studentNumber
+                  << std::setw(20) << surname
+                  << std::setw(20) << name
+                  << std::setw(10) << group
+                  << std::setw(13) << std::fixed << std::setprecision(2) << average
+                  << std::setw(10) << grades[0]
+                  << std::setw(10) << grades[1]
+                  << std::setw(10) << grades[2]
+                  << std::endl;
+    }
+
+    bool IsAboveAverage(double threshold) const {
+        return average >= threshold;
+    }
+
+    //перегрузка оператора меньше
+    bool operator<(const Student& other) const {
+        return this->average < other.average;
+    }
+};
+
+//список студней
+class StudentList {
+private:
+    Student students[100];
+    int count;
+
+public:
+    StudentList() : count(0) {}
+
+    void AddStudent() {
+        if (count < 100) {
+            students[count].Insert();
+            count++;
+        } else {
+            std::cout << "Student list is full.\n";
+        }
+    }
+
+    void ViewStudentsAboveAverage(double threshold) const {
+        std::cout << std::left << std::setw(8) << "No." 
+                  << std::setw(20) << "Surname"
+                  << std::setw(20) << "Name"
+                  << std::setw(10) << "Group"
+                  << std::setw(13) << "Avg Grade"
+                  << std::setw(10) << "Exam 1"
+                  << std::setw(10) << "Exam 2"
+                  << std::setw(10) << "Exam 3" << std::endl;
+
+        std::string line(100, '-');
+        std::cout << line << std::endl;
+
+        for (int i = 0; i < count; ++i) {
+            if (students[i].IsAboveAverage(threshold)) {
+                students[i].Display(i + 1); 
+            }
+        }
+    }
+
+    void ViewAllStudents() const {
+        std::cout << std::left << std::setw(8) << "No." 
+                  << std::setw(20) << "Surname"
+                  << std::setw(20) << "Name"
+                  << std::setw(10) << "Group"
+                  << std::setw(13) << "Avg Grade"
+                  << std::setw(10) << "Exam 1"
+                  << std::setw(10) << "Exam 2"
+                  << std::setw(10) << "Exam 3" << std::endl;
+
+        std::string line(100, '-');
+        std::cout << line << std::endl;
+
+        for (int i = 0; i < count; ++i) {
+            students[i].Display(i + 1);
+        }
+    }
+
+    bool CloneStudent(int studentNumber) {
+        if (count < 100 && studentNumber >= 1 && studentNumber <= count) {
+            //клонируем студента с индексом studentNumber и добавляем его в список
+            students[count] = students[studentNumber - 1].Clone();
+            count++;
+            return true;
+        }
+        return false;
+    }
+
+    Student& GetStudent(int studentNumber) {
+        return students[studentNumber - 1]; 
+    }
+
+    int GetCount() const {
+        return count;
+    }
+};
+
+int main() {
+    StudentList studentList;
+    int choice; 
+
+    do {
+        std::cout << "\nMenu:\n";
+        std::cout << "1. Insert student data\n";
+        std::cout << "2. View students with average grade >= 4.5\n";
+        std::cout << "3. View all students\n";
+        std::cout << "4. Divide two students\n";
+        std::cout << "5. Multiply student grades by a coefficient\n";
+        std::cout << "6. Increment student grades\n";
+        std::cout << "7. Decrement student grades\n";
+        std::cout << "8. Compare two students\n";
+        std::cout << "9. Copy student data\n";
+        std::cout << "10. Assign data from one student to another\n";
+        std::cout << "11. Exit\n";
+        std::cin >> choice; 
+        std::cin.ignore(); 
+
+        switch (choice) {
+            case 1:
+                studentList.AddStudent();
+                break;
+            case 2:
+                studentList.ViewStudentsAboveAverage(4.5);
+                break;
+            case 3:
+                studentList.ViewAllStudents();
+                break;
+            case 4: {
+                int studentNumber1, studentNumber2;
+                std::cout << "Enter the number of the first student (1 to " << studentList.GetCount() << "): ";
+                std::cin >> studentNumber1;
+                std::cout << "Enter the number of the second student (1 to " << studentList.GetCount() << "): ";
+                std::cin >> studentNumber2;
+
+                if (studentNumber1 >= 1 && studentNumber1 <= studentList.GetCount() && 
+                    studentNumber2 >= 1 && studentNumber2 <= studentList.GetCount()) {
+                    Student result = studentList.GetStudent(studentNumber1) / studentList.GetStudent(studentNumber2);
+                    std::cout << "\nAverage score of selected students: " << std::fixed << std::setprecision(2) << result.GetAverage() << std::endl;
+                } else {
+                    std::cout << "Invalid student numbers.\n";
+                }
+                break;
+            }
+            case 5: {
+                int studentNumber;
+                double multiplier;
+                std::cout << "Enter the number of the student (1 to " << studentList.GetCount() << "): ";
+                std::cin >> studentNumber;
+                std::cout << "Enter the multiplier: ";
+                std::cin >> multiplier;
+
+                if (studentNumber >= 1 && studentNumber <= studentList.GetCount()) {
+                    Student result = studentList.GetStudent(studentNumber) * multiplier;
+                    std::cout << "\nResult of multiplying grades:\n";
+                    result.Display(studentNumber); 
+                } else {
+                    std::cout << "Invalid student number.\n";
+                }
+                break;
+            }
+            case 6: {
+                int studentNumber;
+                std::cout << "Enter the number of the student (1 to " << studentList.GetCount() << "): ";
+                std::cin >> studentNumber;
+
+                if (studentNumber >= 1 && studentNumber <= studentList.GetCount()) {
+                    Student result = studentList.GetStudent(studentNumber);
+                    ++result; 
+                    std::cout << "\nGrades after incrementing:\n";
+                    result.Display(studentNumber); 
+                } else {
+                    std::cout << "Invalid student number.\n";
+                }
+                break;
+            }
+            case 7: {
+                int studentNumber;
+                std::cout << "Enter the number of the student (1 to " << studentList.GetCount() << "): ";
+                std::cin >> studentNumber;
+
+                if (studentNumber >= 1 && studentNumber <= studentList.GetCount()) {
+                    Student result = studentList.GetStudent(studentNumber);
+                    --result; 
+                    std::cout << "\nGrades after decrementing:\n";
+                    result.Display(studentNumber); 
+                } else {
+                    std::cout << "Invalid student number.\n";
+                }
+                break;
+            }
+            case 8: {
+                int studentNumber1, studentNumber2;
+                std::cout << "Enter the number of the first student (1 to " << studentList.GetCount() << "): ";
+                std::cin >> studentNumber1;
+                std::cout << "Enter the number of the second student (1 to " << studentList.GetCount() << "): ";
+                std::cin >> studentNumber2;
+
+                if (studentNumber1 >= 1 && studentNumber1 <= studentList.GetCount() && 
+                    studentNumber2 >= 1 && studentNumber2 <= studentList.GetCount()) {
+                    if (studentList.GetStudent(studentNumber1) < studentList.GetStudent(studentNumber2)) {
+                        std::cout << "Student " << studentNumber1 << " has a lower average grade than Student " << studentNumber2 << ".\n";
+                    } else {
+                        std::cout << "Student " << studentNumber1 << " does not have a lower average grade than Student " << studentNumber2 << ".\n";
+                    }
+                } else {
+                    std::cout << "Invalid student numbers.\n";
+                }
+                break;
+            }
+            case 9: {
+                int studentNumber;
+                std::cout << "Enter the number of the student to copy (1 to " << studentList.GetCount() << "): ";
+                std::cin >> studentNumber;
+
+                if (studentList.CloneStudent(studentNumber)) {
+                    std::cout << "Student copied successfully.\n";
+                } else {
+                    std::cout << "Failed to copy student. Check if the student number is valid and the list isn't full.\n";
+                }
+                break;
+            }
+            case 10: {
+                int studentNumber1, studentNumber2;
+                std::cout << "Enter the number of the student to replace (1 to " << studentList.GetCount() << "): ";
+                std::cin >> studentNumber1;
+                std::cout << "Enter the number of the student to copy from (1 to " << studentList.GetCount() << "): ";
+                std::cin >> studentNumber2;
+
+                if (studentNumber1 >= 1 && studentNumber1 <= studentList.GetCount() && 
+                    studentNumber2 >= 1 && studentNumber2 <= studentList.GetCount()) {
+                    studentList.GetStudent(studentNumber1) = studentList.GetStudent(studentNumber2); 
+                    std::cout << "Data of student " << studentNumber1 << " has been replaced with data from student " << studentNumber2 << ".\n";
+                } else {
+                    std::cout << "Invalid student numbers.\n";
+                }
+                break;
+            }
+            case 11:
+                std::cout << "Exiting the program." << std::endl;
+                break;
+            default:
+                std::cout << "Error. Enter a valid option\n";
+                break;
+        }
+
+    } while (choice != 11); 
+
+    return 0;
+}
