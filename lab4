@@ -37,7 +37,13 @@ public:
     bool IsAboveAverage(double threshold) const {
         return average >= threshold;
     }
+
+    friend void PrintAverage(const Student& student);
 };
+
+void PrintAverage(const Student& student) {
+    std::cout << "Average grade for " << student.surname << " " << student.name << ": " << student.average << std::endl;
+}
 
 // Класс для бакалавров
 class UndergraduateStudent : public Student {
@@ -163,6 +169,7 @@ public:
                   << std::setw(20) << surname
                   << std::setw(20) << name
                   << std::setw(10) << group
+
                   << std::setw(13) << std::fixed << std::setprecision(2) << average
                   << std::setw(10) << grades[0]
                   << std::setw(10) << grades[1]
@@ -228,7 +235,9 @@ public:
         std::cout << line << std::endl;
 
         for (int i = 0; i < count; ++i) {
-            if (students[i]->IsAboveAverage(threshold)) { // Проверяем всех студентов
+            if (students[i]->IsAboveAverage(threshold) &&
+                dynamic_cast<GraduateStudent*>(students[i]) && 
+                !dynamic_cast<PhDStudent*>(students[i])) { // Убедимся, что это не аспирант
                 std::cout << std::setw(8) << i + 1
                           << std::setw(20) << students[i]->GetSurname()
                           << std::setw(20) << students[i]->GetName()
@@ -260,10 +269,23 @@ public:
             }
         }
     }
+    friend class Statistics; // Объявление класса Statistics как дружественного
+};
+
+class Statistics {
+public:
+    void PrintAllAverages(const StudentList& studentList) const {
+        for (int i = 0; i < studentList.count; ++i) {
+            std::cout << "Average grade for " << studentList.students[i]->GetSurname() << " "
+                      << studentList.students[i]->GetName() << ": "
+                      << studentList.students[i]->GetAverage() << std::endl;
+        }
+    }
 };
 
 int main() {
     StudentList studentList;
+    Statistics statistics;
     int choice; 
 
     do {
@@ -275,7 +297,8 @@ int main() {
         std::cout << "5. View undergraduate students\n";
         std::cout << "6. View graduate students\n";
         std::cout << "7. View PhD students\n";
-        std::cout << "8. Exit\n";
+        std::cout << "8. Print all average grades\n"; // Новый пункт меню
+        std::cout << "9. Exit\n";
         std::cin >> choice; 
         std::cin.ignore(); 
 
@@ -290,7 +313,7 @@ int main() {
                 studentList.AddStudent(3);
                 break;
             case 4:
-                studentList.ViewStudentsAboveAverage(4.5); // Теперь выводит всех студентов с баллом >= 4.5
+                studentList.ViewStudentsAboveAverage(4.5);
                 break;
             case 5:
                 studentList.ViewStudentsByType(1);
@@ -302,6 +325,9 @@ int main() {
                 studentList.ViewStudentsByType(3);
                 break;
             case 8:
+                statistics.PrintAllAverages(studentList); // Выводим средние оценки
+                break;
+            case 9:
                 std::cout << "Exiting the program." << std::endl;
                 break;
             default:
@@ -309,7 +335,7 @@ int main() {
                 break;
         }
 
-    } while (choice != 8); 
+    } while (choice != 9); 
 
     return 0;
 }
